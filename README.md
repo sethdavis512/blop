@@ -8,6 +8,17 @@ Plop made it normal to keep generators in your repo, so every new component or r
 - **Templates are TypeScript.** No Handlebars: a template is a function that returns a `code` tagged template, and its inputs are typed from the prompts.
 - **Every run is planned first.** Actions describe changes, blop works out the result, and then it writes every file or none. `--dry-run` shows the diffs.
 
+## Use cases
+
+- **Components that arrive complete.** One run creates the component, its story and its barrel file, and adds the export to `src/index.ts`. In a component library, a `modify` step adds the package.json subpath export too. See `ui-component` in the [examples](examples/blop.config.ts).
+- **Routes registered in one step.** Create a React Router route module with its `Route` types imported, and add its `route()` entry to `app/routes.ts` in the same run. See `route`.
+- **Data models from schema to server.** Add a model to `schema.prisma` and write the server module that maps its rows to clean typed objects, so every model follows the same shape. See `model`.
+- **Files right where you're working.** With `{ cwd }`, a generator can put a hook, a test or a feature slice in the folder you run it from, and still update shared files like barrels. See `hook`.
+- **Endpoints and background jobs, wired up.** Write a handler and register it with the router or the task index in one run, so every new endpoint is connected the moment it exists.
+- **Environment variables everywhere they belong.** One generator can add a variable to `.env.example`, the env validation schema and the deploy config, so a new setting never lands halfway.
+- **Team conventions as a package.** Generators are plain TypeScript, so a team can publish them as a package and import them into each project's `blop.config.ts`, renaming them or picking only the ones a project needs.
+- **Scaffolding by AI agents.** An agent finds the generators with `blop schema`, previews with `--dry-run --json`, then writes. It follows the project's own patterns instead of writing boilerplate from memory, and `blop skills stub` gives it the instructions.
+
 ## Quick start
 
 blop isn't on npm yet. Install it from GitHub as a dev dependency in your project:
