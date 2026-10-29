@@ -11,7 +11,7 @@ A tiny, typed code generator for Bun, in the spirit of [Plop](https://plopjs.com
 blop isn't on npm yet. Install it from GitHub as a dev dependency in your project:
 
 ```bash
-bun add -d github:sethdavis512/blop
+bun add -d git+ssh://git@github.com/sethdavis512/blop.git
 bunx blop init
 bunx blop component --name "fancy button" --dry-run
 ```
