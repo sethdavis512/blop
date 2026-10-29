@@ -230,6 +230,93 @@ describe('action context', () => {
     });
 });
 
+describe('examples', () => {
+    beforeEach(async () => {
+        await write('blop.config.ts', await Bun.file(`${import.meta.dir}/examples/blop.config.ts`).text());
+    });
+
+    it('route writes a typed module and registers it at the top of the routes array', async () => {
+        await write(
+            'app/routes.ts',
+            "import { type RouteConfig, index, route } from '@react-router/dev/routes';\n\nexport default [\n    index('routes/home.tsx'),\n] satisfies RouteConfig;\n",
+        );
+        expect((await run('route', '--path', '/users/:id')).exitCode).toBe(0);
+        expect(await read('app/routes.ts')).toContain(
+            "export default [\n    route('users/:id', 'routes/users.$id.tsx'),\n    index('routes/home.tsx'),\n]",
+        );
+        expect(await read('app/routes/users.$id.tsx')).toBe(
+            [
+                "import type { Route } from './+types/users.$id';",
+                '',
+                'export async function loader({ request }: Route.LoaderArgs) {',
+                '    return { path: new URL(request.url).pathname };',
+                '}',
+                '',
+                'export default function UsersId({ loaderData }: Route.ComponentProps) {',
+                '    return <h1>{loaderData.path}</h1>;',
+                '}',
+                '',
+            ].join('\n'),
+        );
+    });
+
+    it('route leaves the loader out with --no-loader', async () => {
+        await write('app/routes.ts', 'export default [\n];\n');
+        expect((await run('route', '--path', 'about', '--no-loader')).exitCode).toBe(0);
+        expect(await read('app/routes/about.tsx')).toBe(
+            "import type { Route } from './+types/about';\n\nexport default function About() {\n    return <h1>About</h1>;\n}\n",
+        );
+    });
+
+    it('hook writes into the folder blop runs in', async () => {
+        await mkdir(join(project, 'src/features/billing'), { recursive: true });
+        expect((await runIn(join(project, 'src/features/billing'), 'hook', '--name', 'window size')).exitCode).toBe(0);
+        expect(await read('src/features/billing/use-window-size.ts')).toContain('export function useWindowSize() {');
+    });
+
+    it('ui-component adds a package.json subpath export', async () => {
+        await write('package.json', '{\n  "name": "ui",\n  "exports": {\n    ".": "./src/index.ts"\n  }\n}\n');
+        expect((await run('ui-component', '--name', 'date picker')).exitCode).toBe(0);
+        expect(JSON.parse(await read('package.json'))).toEqual({
+            name: 'ui',
+            exports: { '.': './src/index.ts', './date-picker': './src/components/DatePicker/index.ts' },
+        });
+        expect(await read('src/index.ts')).toBe("export * from './components/DatePicker';\n");
+    });
+
+    it('model appends to the schema and writes a server module that maps rows', async () => {
+        await write('prisma/schema.prisma', 'datasource db {\n  provider = "postgresql"\n}\n');
+        const { exitCode } = await run('model', '--name', 'todo', '--fields', 'title:String, done:Boolean', '--id', 'autoincrement', '--no-soft-delete');
+        expect(exitCode).toBe(0);
+        expect(await read('prisma/schema.prisma')).toBe(
+            [
+                'datasource db {',
+                '  provider = "postgresql"',
+                '}',
+                '',
+                'model Todo {',
+                '  id        Int      @id @default(autoincrement())',
+                '  title String',
+                '  done Boolean',
+                '  createdAt DateTime @default(now())',
+                '  updatedAt DateTime @updatedAt',
+                '}',
+                '',
+            ].join('\n'),
+        );
+        expect(await read('app/models/todo.server.ts')).toContain(
+            'const row = await prisma.todo.findFirst({ where: { id } });\n    return row && { id: row.id, title: row.title, done: row.done };',
+        );
+    });
+
+    it('model keeps soft delete by default', async () => {
+        await write('prisma/schema.prisma', '');
+        expect((await run('model', '--name', 'note')).exitCode).toBe(0);
+        expect(await read('prisma/schema.prisma')).toContain('  deletedAt DateTime?\n}');
+        expect(await read('app/models/note.server.ts')).toContain('where: { id, deletedAt: null }');
+    });
+});
+
 describe('agent surface', () => {
     it('describes generators and their flags in the schema', async () => {
         await run('init');

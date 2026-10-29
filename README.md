@@ -54,6 +54,8 @@ export default defineConfig({
 
 That generator is `blop component --name <text> --folder <components|ui> --story`. The full starter is in [templates/blop.config.ts](templates/blop.config.ts).
 
+[examples/blop.config.ts](examples/blop.config.ts) has more generators to copy, each showing a different feature: a React Router route registered in `app/routes.ts`, a hook written where you run blop, a library component with a package.json subpath export, and a Prisma model with a server module.
+
 | Prompt | Answer type | Flag |
 | --- | --- | --- |
 | `text(message, { default? })` | `string` | `--key <text>` |

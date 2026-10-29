@@ -33,7 +33,8 @@ lib/code.ts, lib/case.ts  # Pure template helpers
 lib/run.ts                # The I/O shell: read files, plan, write everything or nothing
 lib/config.ts             # Find, import and validate blop.config.ts
 lib/cli.ts                # Context, output, ask, errors and exit codes (from buncli)
-templates/blop.config.ts  # The starter config and the main example
+templates/blop.config.ts  # The starter config written by `blop init`
+examples/blop.config.ts   # More example generators, one feature each, tested in cli.test.ts
 skills/*.md               # Agent guides, compiled into the binary
 ```
 
