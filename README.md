@@ -21,10 +21,10 @@ Plop made it normal to keep generators in your repo, so every new component or r
 
 ## Quick start
 
-blop isn't on npm yet. Install it from GitHub as a dev dependency in your project:
+blop isn't on npm yet. Install it from GitHub as a dev dependency in your project. The `github:` spec downloads a tarball, so CI and Docker builds need no SSH key or git:
 
 ```bash
-bun add -d git+ssh://git@github.com/sethdavis512/blop.git
+bun add -d github:sethdavis512/blop
 bunx blop init
 bunx blop component --name "fancy button" --dry-run
 ```
