@@ -2,6 +2,8 @@
 
 A tiny, typed code generator for Bun, in the spirit of [Plop](https://plopjs.com/).
 
+Plop made it normal to keep generators in your repo, so every new component or route starts from your team's own patterns. blop brings that idea to Bun, and the name says so: Bun plus Plop.
+
 - **Prompts become flags.** Every generator is a command, and every prompt is a flag, so the same generator works at a terminal, in a script, or for an AI agent.
 - **Templates are TypeScript.** No Handlebars: a template is a function that returns a `code` tagged template, and its inputs are typed from the prompts.
 - **Every run is planned first.** Actions describe changes, blop works out the result, and then it writes every file or none. `--dry-run` shows the diffs.
