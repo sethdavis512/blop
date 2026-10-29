@@ -72,15 +72,82 @@ Paths are relative to the config file. Actions run in order and each sees the ch
 
 `actions` also receives `{ cwd }`: the folder blop ran in, relative to the config (`.` at the root). Use it for files that belong where you're standing, like `` add(`${cwd}/${Name}.tsx`, ...) ``, while fixed files such as `src/index.ts` keep their root paths.
 
-### The `code` tag
+### Templates and the `code` tag
+
+A template is a TypeScript function that returns a `code` tagged template. There's no template language to learn, and that buys you a few things:
+
+- **Type checking.** Template inputs are typed from the prompts, so a typo like `${Nmae}` is a type error instead of an empty string in the output.
+- **Plain logic.** Use `map`, ternaries and `&&` where a template language would need `{{#each}}` and `{{#if}}`.
+- **Nothing to register.** Helpers are imports, and partials are functions you call.
+
+`code` takes care of the whitespace:
 
 - Indent templates to match your code. `code` removes the shared indentation and ends with one newline.
-- Multi-line values are indented to the column they're inserted at.
+- Multi-line values are indented to the column they're inserted at, so nested `code` results line up.
 - `false`, `null` and `undefined` render nothing, and a line holding only one of them is removed.
 - Arrays render one item per line.
-- Text is raw, so `\n` stays `\n` in the output. Write \` and \${ for a literal backtick or `${`.
 
-Case helpers: `pascal`, `camel`, `kebab`, `snake`, `constant`, `title` and `words`.
+```ts
+const row = (fields: string[], withDone: boolean) => code`
+    type Row = {
+        ${fields.map((field) => `${field}: string;`)}
+        ${withDone && 'done: boolean;'}
+    };
+`;
+
+row(['id', 'title'], false);
+```
+
+```ts
+type Row = {
+    id: string;
+    title: string;
+};
+```
+
+**Optional blocks.** A dropped line removes just that line. For an optional block with blank lines around it, build each block as its own `code` piece and join them. Every `code` result ends with one newline, so joining with `'\n'` leaves one blank line between blocks:
+
+```ts
+const routeModule = (withLoader: boolean) =>
+    [
+        code`import type { Route } from './+types/home';`,
+        withLoader && code`
+            export async function loader() {
+                return { message: 'Hello' };
+            }
+        `,
+        code`
+            export default function Home() {
+                return <h1>Home</h1>;
+            }
+        `,
+    ]
+        .filter(Boolean)
+        .join('\n');
+```
+
+**Escaping.** Text is raw, like `String.raw`, so `\n` in a template stays `\n` in the generated file. To generate code with its own backticks or `${`, escape them as \` and \${:
+
+```ts
+code`const greeting = \`Hello, \${name}\`;`
+// writes: const greeting = `Hello, ${name}`;
+```
+
+### Case helpers
+
+`blop` exports helpers that turn an answer into names. They accept any style, so `fancy button`, `fancyButton`, `fancy-button` and `FANCY_BUTTON` all give the same result:
+
+| Helper | `fancy button` becomes |
+| --- | --- |
+| `pascal` | `FancyButton` |
+| `camel` | `fancyButton` |
+| `kebab` | `fancy-button` |
+| `snake` | `fancy_button` |
+| `constant` | `FANCY_BUTTON` |
+| `title` | `Fancy Button` |
+| `words` | `['fancy', 'button']` |
+
+Templates are plain TypeScript, so any other function works too, whether it's your own or a package like `change-case`.
 
 ## CLI
 
@@ -107,6 +174,36 @@ blop skills get core          # operating guide for agents
 blop skills get config        # how to write generators
 blop skills stub > ~/.claude/skills/blop/SKILL.md
 ```
+
+### Output and errors
+
+With `--json`, a run prints one line on stdout:
+
+```json
+{"generator":"component","answers":{"name":"Card","folder":"components","story":false},"dryRun":false,"changes":[{"path":"src/components/Card/Card.tsx","status":"create"},{"path":"src/components/Card/index.ts","status":"create"},{"path":"src/index.ts","status":"update"}]}
+```
+
+Each change's `status` is `create`, `update` or `skip`, and a skipped file has a `reason` such as `already exists`. Errors are one line on stderr, and stdout stays empty:
+
+```json
+{"error":{"code":"missing_input","message":"Missing required input: name.","hint":"Pass it with `--name <text>`. `blop component --help` lists every flag."}}
+```
+
+| Code | Exit | When |
+| --- | --- | --- |
+| `missing_input` | 2 | A prompt with no default wasn't passed, and nobody can be asked. |
+| `invalid_input` | 2 | A text flag was empty. |
+| `invalid_argument` | 2 | A select flag isn't one of its choices. |
+| `unknown_command`, `unknown_option` | 2 | Not a generator or flag in this config. `blop schema` lists them. |
+| `no_command` | 2 | No command was given, and nobody can be asked to pick a generator. |
+| `unknown_skill` | 2 | `blop skills get` was given a guide that doesn't exist. |
+| `conflict` | 1 | An action failed: a file exists, a file to change is missing, or a pattern didn't match. Nothing was written. |
+| `config_not_found` | 1 | No `blop.config.ts` in the current folder or above it. `blop init` creates one. |
+| `invalid_config` | 1 | The config's default export isn't a set of generators, or a name clashes with a built-in. |
+| `blop_not_installed` | 1 | The config imports `blop`, but the project can't resolve it. |
+| `internal_error` | 1 | Anything unexpected, such as a syntax error in the config. |
+
+Other Commander parse errors, such as `missing_argument`, also exit 2.
 
 ## Development
 

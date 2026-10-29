@@ -60,10 +60,13 @@ With `--json`, errors are one line of JSON on stderr, and stdout stays empty:
 | `invalid_input` | 2 | A text flag was empty. |
 | `invalid_argument` | 2 | A select flag isn't one of its choices. |
 | `unknown_command`, `unknown_option` | 2 | Not a generator or flag in this config. Check `blop schema`. |
+| `no_command` | 2 | No command was given. Pass a generator name. |
+| `unknown_skill` | 2 | `blop skills get` was given a guide that doesn't exist. |
 | `conflict` | 1 | An action failed (a file exists, a file to update is missing, or a pattern didn't match). Nothing was written. |
 | `config_not_found` | 1 | No `blop.config.ts` was found. `blop init` creates one. |
 | `invalid_config` | 1 | The config's default export isn't a valid set of generators. |
 | `blop_not_installed` | 1 | The config imports `blop`, but the project can't resolve it. |
+| `internal_error` | 1 | Anything unexpected, such as a syntax error in the config. |
 
 ## Rules
 

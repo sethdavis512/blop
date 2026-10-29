@@ -72,11 +72,24 @@ Templates are functions that return a `code` tagged template:
 - A multi-line value is indented to the column it's inserted at, so nested `code` results line up.
 - `null`, `undefined` and `false` render nothing, and a line holding only such a value is removed: `${story && "import './story';"}`.
 - Arrays render one item per line: `${fields.map((field) => code`${field}: string;`)}`.
-- Text is raw: `\n` stays a backslash and an n in the output. Write \` and \${ to emit a backtick or `${`.
+- Text is raw: `\n` stays a backslash and an n in the output. Write \` and \${ to emit a backtick or `${`:
+
+```ts
+code`const greeting = \`Hello, \${name}\`;`
+// writes: const greeting = `Hello, ${name}`;
+```
+
+A dropped line removes just that line. For an optional block with blank lines around it, build each block as its own `code` piece and join them with `'\n'`. Every `code` result ends with one newline, so that leaves one blank line between blocks:
+
+```ts
+[code`import type { Route } from './+types/home';`, withLoader && loaderBlock, componentBlock]
+    .filter(Boolean)
+    .join('\n');
+```
 
 ## Case helpers
 
-`pascal`, `camel`, `kebab`, `snake`, `constant` and `title` convert names like `fancy button`, `fancyButton` or `FANCY_BUTTON`. `words` splits a name into lowercase words.
+`pascal`, `camel`, `kebab`, `snake`, `constant` and `title` convert names in any style: `fancy button`, `fancyButton`, `fancy-button` and `FANCY_BUTTON` all give `FancyButton`, `fancyButton`, `fancy-button`, `fancy_button`, `FANCY_BUTTON` and `Fancy Button`. `words` splits a name into lowercase words. Templates are plain TypeScript, so any other function works too.
 
 ## Check your work
 
