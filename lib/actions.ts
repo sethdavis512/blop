@@ -20,6 +20,8 @@ export type AppendAction = {
     after?: string | RegExp;
     /** Skip the entry when its lines are already in the file. */
     unique: boolean;
+    /** Start from an empty file when it doesn't exist, instead of failing. */
+    create: boolean;
 };
 
 export type ModifyAction = {
@@ -35,13 +37,13 @@ export function add(path: string, content: string, options: { ifExists?: AddActi
     return { type: 'add', path, content, ifExists: options.ifExists ?? 'error' };
 }
 
-/** Add an entry, such as an export, to a file that exists (or that an earlier action creates). */
+/** Add an entry, such as an export, to a file that exists, or that an earlier action or `create` makes. */
 export function append(
     path: string,
     content: string,
-    options: { after?: string | RegExp; unique?: boolean } = {},
+    options: { after?: string | RegExp; unique?: boolean; create?: boolean } = {},
 ): AppendAction {
-    return { type: 'append', path, content, after: options.after, unique: options.unique ?? true };
+    return { type: 'append', path, content, after: options.after, unique: options.unique ?? true, create: options.create ?? false };
 }
 
 /** Rewrite a file that exists with a function of its contents. */

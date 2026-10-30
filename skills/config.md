@@ -24,7 +24,7 @@ export default defineConfig({
             return [
                 add(`src/${folder}/${Name}/${Name}.tsx`, componentFile(Name)),
                 story && add(`src/${folder}/${Name}/${Name}.stories.tsx`, '...'),
-                append('src/index.ts', `export * from './${folder}/${Name}';`),
+                append('src/index.ts', `export * from './${folder}/${Name}';`, { create: true }),
             ];
         },
     }),
@@ -59,10 +59,10 @@ actions: ({ name }, { cwd }) => [
 | Helper | Does | Fails when |
 | --- | --- | --- |
 | `add(path, content, { ifExists? })` | Creates a file. `ifExists` is `'error'` (default), `'skip'` or `'overwrite'`. | The file exists and `ifExists` is `'error'`, unless `--force` is passed. |
-| `append(path, entry, { after?, unique? })` | Puts the entry on its own line at the end, or after the line matching `after` (a string or RegExp). With `unique` (default `true`), an entry already in the file is skipped. | The file doesn't exist, or `after` doesn't match. |
+| `append(path, entry, { after?, unique?, create? })` | Puts the entry on its own line at the end, or after the line matching `after` (a string or RegExp). With `unique` (default `true`), an entry already in the file is skipped. With `create` (default `false`), a missing file starts out empty. | The file doesn't exist and `create` is off, or `after` doesn't match. |
 | `modify(path, (source) => string)` | Rewrites a file with a function of its contents. | The file doesn't exist. |
 
-To create a file only if it's missing and then add to it, use `add(path, '', { ifExists: 'skip' })` followed by `append(path, entry)`.
+To add to a file such as a barrel, creating it if it's missing, use `append(path, entry, { create: true })`.
 
 ## Templates with `code`
 

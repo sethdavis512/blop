@@ -41,6 +41,14 @@ describe('createPlan', () => {
         expect(result.changes).toEqual([{ path: 'src/index.ts', status: 'create', before: null, after: 'one\ntwo\n' }]);
     });
 
+    it('creates a missing file when an append asks to', () => {
+        const actions = [append('src/index.ts', 'one', { create: true }), append('src/index.ts', 'two', { create: true })];
+        expect(plan(actions).changes).toEqual([{ path: 'src/index.ts', status: 'create', before: null, after: 'one\ntwo\n' }]);
+        expect(plan(actions, { 'src/index.ts': 'one\n' }).changes).toEqual([
+            { path: 'src/index.ts', status: 'update', before: 'one\n', after: 'one\ntwo\n' },
+        ]);
+    });
+
     it('appends after the line that matches, and only once', () => {
         const before = '// exports\nexport * from "./a";\n';
         const actions = [append('index.ts', 'export * from "./b";', { after: '// exports' })];

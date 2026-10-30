@@ -171,8 +171,7 @@ export default defineConfig({
             return [
                 add(`${dir}/${Name}.tsx`, libraryComponent(Name)),
                 add(`${dir}/index.ts`, `export * from './${Name}';\n`),
-                add('src/index.ts', '', { ifExists: 'skip' }),
-                append('src/index.ts', `export * from './components/${Name}';`),
+                append('src/index.ts', `export * from './components/${Name}';`, { create: true }),
                 // modify takes a plain function, so JSON can be parsed and written back.
                 modify('package.json', (source) => {
                     const pkg = JSON.parse(source) as { exports?: Record<string, string> };

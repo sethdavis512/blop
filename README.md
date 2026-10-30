@@ -31,6 +31,8 @@ bunx blop component --name "fancy button" --dry-run
 
 `blop init` writes a starter `blop.config.ts` with a `component` generator. Commit it, and everyone on the project gets the same generators. Run `bunx blop` on its own to pick a generator and answer its prompts, or add `"blop": "blop"` to your package.json scripts and run `bun blop`.
 
+To typecheck your generators, make sure a tsconfig includes `blop.config.ts`. Vite's templates only cover `src` and `vite.config.ts`, so add it to `include` in `tsconfig.node.json`.
+
 ## Writing generators
 
 ```ts
@@ -56,7 +58,7 @@ export default defineConfig({
             return [
                 add(`src/${folder}/${Name}/${Name}.tsx`, componentFile(Name)),
                 story && add(`src/${folder}/${Name}/${Name}.stories.tsx`, '...'),
-                append('src/index.ts', `export * from './${folder}/${Name}';`),
+                append('src/index.ts', `export * from './${folder}/${Name}';`, { create: true }),
             ];
         },
     }),
@@ -76,7 +78,7 @@ That generator is `blop component --name <text> --folder <components|ui> --story
 | Action | Does |
 | --- | --- |
 | `add(path, content, { ifExists? })` | Creates a file. Fails if it exists, unless `ifExists` is `'skip'` or `'overwrite'`, or `--force` is passed. |
-| `append(path, entry, { after?, unique? })` | Adds a line at the end, or after the line matching `after`. Skips entries that are already there. |
+| `append(path, entry, { after?, unique?, create? })` | Adds a line at the end, or after the line matching `after`. Skips entries that are already there. With `create`, a missing file starts out empty instead of failing. |
 | `modify(path, (source) => string)` | Rewrites a file with a function of its contents. |
 
 Paths are relative to the config file. Actions run in order and each sees the changes before it, and falsy entries are skipped, so `condition && add(...)` works.

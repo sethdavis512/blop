@@ -39,9 +39,8 @@ export default defineConfig({
                 add(`${dir}/${Name}.tsx`, componentFile(Name)),
                 story && add(`${dir}/${Name}.stories.tsx`, storyFile(Name, folder)),
                 add(`${dir}/index.ts`, `export * from './${Name}';\n`),
-                // Create the barrel if it's missing, then add this component to it.
-                add('src/index.ts', '', { ifExists: 'skip' }),
-                append('src/index.ts', `export * from './${folder}/${Name}';`),
+                // Add this component to the barrel, creating it if it's missing.
+                append('src/index.ts', `export * from './${folder}/${Name}';`, { create: true }),
             ];
         },
     }),

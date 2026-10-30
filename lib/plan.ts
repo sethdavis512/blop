@@ -81,12 +81,13 @@ function applyAction(action: Action, path: string, existing: string | null, forc
         if (ifExists === 'skip') return { skip: 'already exists' };
         return { problem: { code: 'file_exists', message: `${path} already exists` } };
     }
-    if (existing === null) {
+    const source = existing ?? (action.type === 'append' && action.create ? '' : null);
+    if (source === null) {
         return { problem: { code: 'file_missing', message: `${path} doesn't exist, so there's nothing to ${action.type}` } };
     }
-    if (action.type === 'modify') return { text: action.transform(existing) };
-    if (action.unique && containsLines(existing, action.content)) return { skip: 'entry already present' };
-    const text = insertEntry(existing, action.content, action.after);
+    if (action.type === 'modify') return { text: action.transform(source) };
+    if (action.unique && containsLines(source, action.content)) return { skip: 'entry already present' };
+    const text = insertEntry(source, action.content, action.after);
     if (text === null) return { problem: { code: 'no_match', message: `${path} has no match for ${String(action.after)}` } };
     return { text };
 }
