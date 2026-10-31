@@ -2,6 +2,8 @@
 
 A tiny, typed code generator for Bun, in the spirit of [Plop](https://plopjs.com/).
 
+**Deterministic scaffolding for AI agents.** The agent picks the inputs; blop makes the output deterministic.
+
 Plop made it normal to keep generators in your repo, so every new component or route starts from your team's own patterns. blop brings that idea to Bun, and the name says so: Bun plus Plop.
 
 - **Prompts become flags.** Every generator is a command, and every prompt is a flag, so the same generator works at a terminal, in a script, or for an AI agent.
@@ -178,6 +180,8 @@ blop --config path/to/blop.config.ts   # use a specific config
 blop uses the nearest `blop.config.ts`, `.js` or `.mjs` in the current folder or above it.
 
 ## Built for AI agents
+
+The agent picks the inputs; blop makes the output deterministic. The same generator with the same flags writes the same files every time, so an agent follows the project's recipe instead of improvising boilerplate.
 
 blop keeps the [buncli](https://github.com/sethdavis512/buncli) contract: `--json` output, `--non-interactive`, stable error codes with hints, and exit codes `0` (success), `1` (runtime error) and `2` (usage error). Without a terminal it never prompts. A missing answer uses the prompt's default, or fails with `missing_input`.
 
