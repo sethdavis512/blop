@@ -71,6 +71,8 @@ That generator is `blop component --name <text> --folder <components|ui> --story
 
 [examples/blop.config.ts](examples/blop.config.ts) has more generators to copy, each showing a different feature: a React Router route registered in `app/routes.ts`, a hook written where you run blop, a library component with a package.json subpath export, and a Prisma model with a server module.
 
+For a whole project set up with blop, see [blop-vite-react](https://github.com/sethdavis512/blop-vite-react): a Vite + React app whose components and hooks come from its own `blop.config.ts`.
+
 | Prompt | Answer type | Flag |
 | --- | --- | --- |
 | `text(message, { default? })` | `string` | `--key <text>` |
